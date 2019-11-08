@@ -29,6 +29,8 @@ namespace ExcelMerge.GUI.Views
 
         private FastGridControl copyTargetGrid;
 
+        private MergeWindow mergeWindow = null;
+
         public DiffView()
         {
             InitializeComponent();
@@ -427,6 +429,8 @@ namespace ExcelMerge.GUI.Views
                 diff = ExcelSheet.Diff(srcSheet, dstSheet, diffConfig);
             });
 
+
+
             return diff;
         }
 
@@ -480,6 +484,19 @@ namespace ExcelMerge.GUI.Views
 
             if (App.Instance.Setting.FocusFirstDiff)
                 MoveNextModifiedCell();
+
+            //Show Merge Window if there is Diff.
+            if(summary.HasDiff == true)
+            {
+                if(mergeWindow != null)
+                {
+                    mergeWindow.Close();
+                    mergeWindow = null;
+                }
+
+                mergeWindow = new MergeWindow(this);
+                mergeWindow.Show();
+            }
         }
 
         private FileSetting FindFilseSetting(string fileName, int sheetIndex, string sheetName, bool isStartup)
