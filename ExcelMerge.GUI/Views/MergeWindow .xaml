@@ -37,7 +37,7 @@
 
 		<!--Src Location Grid-->
 		<Border BorderBrush="LightGray" BorderThickness="1" Grid.Column="0" Grid.Row="1" Margin="5, 5, 5, 20">
-			<Grid x:Name="SrcLocationGrid" ShowGridLines="False"
+			<Grid x:Name="MergeLocationGrid" ShowGridLines="False"
             MouseDown="LocationGrid_MouseDown" MouseMove="LocationGrid_MouseMove" MouseWheel="LocationGrid_MouseWheel"
             Background="#00000000">
 				<Rectangle x:Name="SrcViewRectangle" HorizontalAlignment="Left" VerticalAlignment="Top"
@@ -49,7 +49,7 @@
 		</Border>
 
 		<!--Src Grid-->
-		<fg:FastGridControl x:Name="SrcDataGrid" Grid.Column="1" Grid.Row="1" Margin="1, 45, 1, 1"
+		<fg:FastGridControl x:Name="MergeDataGrid" Grid.Column="1" Grid.Row="1" Margin="1, 45, 1, 1"
                         IsTransposed="{Binding IsChecked, ElementName=chbIsTransposed1, Mode=TwoWay}"
                         UseClearType="{Binding IsChecked, ElementName=chbClearType1}"
                         IsReadOnly="True"

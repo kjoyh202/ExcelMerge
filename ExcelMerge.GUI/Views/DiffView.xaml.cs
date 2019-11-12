@@ -17,6 +17,7 @@ using ExcelMerge.GUI.ViewModels;
 using ExcelMerge.GUI.Settings;
 using ExcelMerge.GUI.Models;
 using ExcelMerge.GUI.Styles;
+using System.Reflection;
 
 namespace ExcelMerge.GUI.Views
 {
@@ -173,6 +174,13 @@ namespace ExcelMerge.GUI.Views
             LocationGridEventDispatcher.Instance.DispatchSizeChangeEvent(args, e);
         }
 
+        public void SetCurrentCell(int? row, int? column)
+        {
+            SrcDataGrid.CurrentCell = new FastGridCellAddress(row, column);
+            DstDataGrid.CurrentCell = new FastGridCellAddress(row, column);
+        }
+
+
         private void DataGrid_SelectedCellsChanged(object sender, FastWpfGrid.SelectionChangedEventArgs e)
         {
             var grid = copyTargetGrid = sender as FastGridControl;
@@ -204,6 +212,14 @@ namespace ExcelMerge.GUI.Views
             {
                 var a = new DiffViewEventArgs<RichTextBox>(null, container, TargetType.First);
                 ValueTextBoxEventDispatcher.Instance.DispatchGotFocusEvent(a);
+            }
+
+            int? row = DstDataGrid.CurrentCell.Row;
+            int? column = DstDataGrid.CurrentCell.Column;
+
+            if (mergeWindow != null)
+            {
+                mergeWindow.SetCurrentCell(row, column);
             }
         }
 
@@ -420,6 +436,27 @@ namespace ExcelMerge.GUI.Views
             return Tuple.Create(srcSetting, dstSetting);
         }
 
+        private FileSetting FindFileSettings(bool isStartup, string filePath)
+        {
+            FileSetting fileSetting = null;
+
+            if (!IgnoreFileSettingCheckbox.IsChecked.Value)
+            {
+                fileSetting =
+                    FindFilseSetting(Path.GetFileName(filePath), SrcSheetCombobox.SelectedIndex, SrcSheetCombobox.SelectedItem.ToString(), isStartup);
+            }
+            else
+            {
+                diffConfig = new ExcelSheetDiffConfig();
+
+                diffConfig.SrcSheetIndex = Math.Max(SrcSheetCombobox.SelectedIndex, 0);
+                diffConfig.DstSheetIndex = Math.Max(DstSheetCombobox.SelectedIndex, 0);
+            }
+
+            return fileSetting;
+        }
+
+
         private ExcelSheetDiff ExecuteDiff(ExcelSheet srcSheet, ExcelSheet dstSheet)
         {
             ExcelSheetDiff diff = null;
@@ -486,15 +523,35 @@ namespace ExcelMerge.GUI.Views
                 MoveNextModifiedCell();
 
             //Show Merge Window if there is Diff.
-            if(summary.HasDiff == true)
+      //      if(summary.HasDiff == true)
             {
-                if(mergeWindow != null)
+                var directory =  AppDomain.CurrentDomain.BaseDirectory;
+
+                var tempFilePath = Path.Combine(directory, "temp.tmp");
+                try
+                {
+                    //Create temp file
+                    if (File.Exists(tempFilePath))
+                    {
+                        File.Delete(tempFilePath);
+                    }
+
+                    File.Copy(DstPathTextBox.Text, tempFilePath);
+                }
+                catch(Exception e)
+                {
+                    return;
+                }
+
+                if (mergeWindow != null)
                 {
                     mergeWindow.Close();
                     mergeWindow = null;
                 }
 
-                mergeWindow = new MergeWindow(this);
+                FileSetting mergeFileSetting = FindFileSettings(isStartup, tempFilePath);
+
+                mergeWindow = new MergeWindow(this, DstPathTextBox.Text, tempFilePath, DstSheetCombobox.SelectedItem.ToString(), mergeFileSetting);
                 mergeWindow.Show();
             }
         }
