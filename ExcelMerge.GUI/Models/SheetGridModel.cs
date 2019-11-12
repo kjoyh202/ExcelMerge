@@ -132,9 +132,16 @@ namespace ExcelMerge.GUI.Models
 
             cell = excelCell;
             return true;
-        }        
+        }
 
-        
+        public override void SetCellText(int row, int column, string value)
+        {
+      
+            ExcelCell newCell = new ExcelCell(value, column, row);
+            ExcelSheet.ReplaceCell(row, column, newCell);
+        }
+
+
         private bool TryGetRow(int row, out ExcelRow excelRow, bool direct = false)
         {
             if (direct)

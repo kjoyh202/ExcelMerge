@@ -50,6 +50,48 @@ namespace ExcelMerge
         {
             Cells = cells.ToList();
         }
+
+        public void AddCell(ExcelCell newCell)
+        {
+            for (int i = 0; i < Cells.Count; i++)
+            {
+                if (Cells[i].OriginalColumnIndex == newCell.OriginalColumnIndex)
+                {
+                    Cells[i].SetValue(newCell.Value);
+                    return;
+                }
+            }
+
+            if (Cells.Count <= newCell.OriginalColumnIndex)
+            {
+                for (int i = 0; i < newCell.OriginalColumnIndex + 1; i++)
+                {
+                    if(i >= Cells.Count)
+                    {
+                        Cells.Add(new ExcelCell(string.Empty, i, newCell.OriginalRowIndex));
+                    }                    
+
+                    if(i == newCell.OriginalColumnIndex)
+                    {
+                        Cells[i].SetValue(newCell.Value);
+                        return;
+                    }
+                }
+            }
+        }
+
+        public ExcelCell GetCellWithOriginalColum(int column)
+        {
+            foreach(var cell in Cells)
+            {
+                if(cell.OriginalColumnIndex == column)
+                {
+                    return cell;
+                }
+            }
+
+            return null;
+        }
     }
 
     internal class RowComparer : IEqualityComparer<ExcelRow>

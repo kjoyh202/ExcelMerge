@@ -120,6 +120,18 @@
   <data name="Button_ExtractDiff" xml:space="preserve">
     <value>Extract Diff</value>
   </data>
+  <data name="Button_ApplyCell" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="Button_MergeSource" xml:space="preserve">
+    <value>Merge Source</value>
+  </data>
+  <data name="Button_MergeDestination" xml:space="preserve">
+    <value>Merge Destination</value>
+  </data>
+  <data name="Button_SaveExcel" xml:space="preserve">
+    <value>Save Excel</value>
+  </data>
   <data name="Label_SkipFirstBlankRows" xml:space="preserve">
     <value>Skip first blank rows</value>
   </data>

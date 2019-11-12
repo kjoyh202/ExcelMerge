@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using ExcelMerge.GUI.Models;
 using ExcelMerge.GUI.Settings;
@@ -11,9 +12,7 @@ using Microsoft.Practices.Unity;
 
 namespace ExcelMerge.GUI.Views
 {
-    /// <summary>
-    /// MainWindow.xaml の相互作用ロジック
-    /// </summary>
+
     public partial class MergeWindow : Window
     {
         private ExcelSheetDiffConfig diffConfig = new ExcelSheetDiffConfig();
@@ -69,7 +68,8 @@ namespace ExcelMerge.GUI.Views
         {
             container = new UnityContainer();
             container
-                .RegisterInstance(mergeKey, MergeDataGrid);
+                .RegisterInstance(mergeKey, MergeDataGrid)
+                .RegisterInstance(mergeKey, MergeValueTextBox);
         }
 
         private void ReadWorkBook()
@@ -166,10 +166,9 @@ namespace ExcelMerge.GUI.Views
             if (MergeDataGrid.Model == null)
                 return;
 
-            var srcValue =
-                (MergeDataGrid.Model as SheetGridModel).GetCellText(MergeDataGrid.CurrentCell.Row.Value, MergeDataGrid.CurrentCell.Column.Value, true);            
+            var value = (MergeDataGrid.Model as SheetGridModel).GetCellText(MergeDataGrid.CurrentCell.Row.Value, MergeDataGrid.CurrentCell.Column.Value, true);            
 
-         //   UpdateValue(srcValue, dstValue);
+            UpdateValue(value);
             
             if (App.Instance.Setting.AlwaysExpandCellDiff)
             {
@@ -183,58 +182,11 @@ namespace ExcelMerge.GUI.Views
             }
         }
 
-        private void UpdateValue(string srcValue)
+        private void UpdateValue(string value)
         {
-            /*
-            SrcValueTextBox.Document.Blocks.First().ContentStart.Paragraph.Inlines.Clear();
+            MergeValueTextBox.Document.Blocks.First().ContentStart.Paragraph.Inlines.Clear();
 
-            var srcLines = srcValue.Split('\n').Select(s => s.TrimEnd());
-            var dstLines = dstValue.Split('\n').Select(s => s.TrimEnd());
-
-            var lineDiffResults = DiffCellValue(srcLines, dstLines).ToList();
-
-            var srcRange = new List<Tuple<string, Color?>>();
-            var dstRange = new List<Tuple<string, Color?>>();
-            foreach (var lineDiffResult in lineDiffResults)
-            {
-                if (lineDiffResult.Status == DiffStatus.Equal)
-                {
-                    DiffEqualLine(lineDiffResult, srcRange);
-                    DiffEqualLine(lineDiffResult, dstRange);
-                }
-                else if (lineDiffResult.Status == DiffStatus.Modified)
-                {
-                    var charDiffResults = DiffUtil.Diff(lineDiffResult.Obj1, lineDiffResult.Obj2);
-                    charDiffResults = DiffUtil.Order(charDiffResults, DiffOrderType.LazyDeleteFirst);
-                    charDiffResults = DiffUtil.OptimizeCaseDeletedFirst(charDiffResults);
-
-                    DiffModifiedLine(charDiffResults.Where(r => r.Status != DiffStatus.Inserted), srcRange, true);
-                    DiffModifiedLine(charDiffResults.Where(r => r.Status != DiffStatus.Deleted), dstRange, false);
-                }
-                else if (lineDiffResult.Status == DiffStatus.Deleted)
-                {
-                    DiffDeletedLine(lineDiffResult, srcRange, true);
-                    DiffDeletedLine(lineDiffResult, dstRange, false);
-                }
-                else if (lineDiffResult.Status == DiffStatus.Inserted)
-                {
-                    DiffInsertedLine(lineDiffResult, srcRange, true);
-                    DiffInsertedLine(lineDiffResult, dstRange, false);
-                }
-            }
-
-            foreach (var r in srcRange)
-            {
-                var bc = r.Item2.HasValue ? new SolidColorBrush(r.Item2.Value) : new SolidColorBrush();
-                SrcValueTextBox.Document.Blocks.First().ContentStart.Paragraph.Inlines.Add(new Run(r.Item1) { Background = bc });
-            }
-
-            foreach (var r in dstRange)
-            {
-                var bc = r.Item2.HasValue ? new SolidColorBrush(r.Item2.Value) : new SolidColorBrush();
-                DstValueTextBox.Document.Blocks.First().ContentStart.Paragraph.Inlines.Add(new Run(r.Item1) { Background = bc });
-            }
-            */
+            MergeValueTextBox.Document.Blocks.First().ContentStart.Paragraph.Inlines.Add(value);
         }
 
 
@@ -353,7 +305,6 @@ namespace ExcelMerge.GUI.Views
             {
                 MergeDataGrid.CurrentCell = FastGridCellAddress.Zero;
             }
-
         }
 
         private bool ValidateDataGrids()
@@ -362,5 +313,50 @@ namespace ExcelMerge.GUI.Views
         }
 
 
+        #region RichText
+        private void ValueTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            var args = new DiffViewEventArgs<RichTextBox>(sender as RichTextBox, container, TargetType.First);
+            ValueTextBoxEventDispatcher.Instance.DispatchGotFocusEvent(args);
+        }
+
+        private void ValueTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var args = new DiffViewEventArgs<RichTextBox>(sender as RichTextBox, container, TargetType.First);
+            ValueTextBoxEventDispatcher.Instance.DispatchLostFocusEvent(args);
+        }
+
+        private void ValuteTextBox_ScrollChanged(object sender, RoutedEventArgs e)
+        {
+            var args = new DiffViewEventArgs<RichTextBox>(sender as RichTextBox, container);
+            ValueTextBoxEventDispatcher.Instance.DispatchScrolledEvent(args, (ScrollChangedEventArgs)e);
+        }
+        #endregion
+
+        private void ApplyCellButton_Click(object sender, RoutedEventArgs e)
+        {
+            var text = new TextRange(MergeValueTextBox.Document.ContentStart, MergeValueTextBox.Document.ContentEnd).Text;
+
+            text = text.Substring(0, text.LastIndexOf("\r\n"));
+            
+            (MergeDataGrid.Model as SheetGridModel).SetCellText(MergeDataGrid.CurrentCell.Row.Value, MergeDataGrid.CurrentCell.Column.Value, text);
+
+            MergeDataGrid.NotifyRefresh();
+        }
+
+        private void MergeSrcButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void MergeDstButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void SaveExcel_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

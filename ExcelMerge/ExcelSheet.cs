@@ -109,6 +109,14 @@ namespace ExcelMerge
             }
         }
 
+        public void ReplaceCell(int row, int column, ExcelCell cell)
+        {
+            if (Rows.Count < row)
+                return;
+
+            Rows[row].AddCell(cell);
+        }
+
         private static ExcelSheet CreateSheet(IEnumerable<ExcelRow> rows)
         {
             var sheet = new ExcelSheet();

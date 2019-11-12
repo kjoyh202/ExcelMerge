@@ -12,5 +12,10 @@
             OriginalColumnIndex = originalColumnIndex;
             OriginalRowIndex = originalRowIndex;
         }
+
+        public void SetValue(string value)
+        {
+            Value = value;
+        }
     }
 }

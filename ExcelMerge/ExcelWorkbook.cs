@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
 
 namespace ExcelMerge
 {
@@ -64,6 +65,34 @@ namespace ExcelMerge
             wb.Sheets.Add(Path.GetFileName(path), ExcelSheet.CreateFromTsv(path, config));
 
             return wb;
+        }
+
+        private void SaveExcel(string path)
+        {
+            using(FileStream stream = new FileStream(path, FileMode.Create, FileAccess.Write))
+            {
+                IWorkbook wb = new XSSFWorkbook();
+
+                foreach (KeyValuePair<string, ExcelSheet> kp in Sheets)
+                {
+                    var sheet = wb.CreateSheet(kp.Key);
+                    var sheetData = kp.Value;
+
+                    for (int i = 0; i < sheetData.Rows.Count; i++)
+                    {
+                        var rowData = sheetData.Rows[i];
+
+                        for (int j = 0; j < rowData.Cells.Count; j++)
+                        {
+                            IRow row = sheet.CreateRow(i);
+                            ICell cell = row.CreateCell(j);
+                            cell.SetCellValue(rowData.Cells[j].Value);
+                        }
+                    }
+                }
+
+                wb.Write(stream);
+            }    
         }
     }
 }
