@@ -166,6 +166,10 @@ namespace ExcelMerge.GUI.Models
                     return App.Instance.Setting.AddedColor;
                 case ExcelCellStatus.Removed:
                     return App.Instance.Setting.RemovedColor;
+                case ExcelCellStatus.Empty:
+                    return App.Instance.Setting.RemovedColor;
+                case ExcelCellStatus.Filled:
+                    return App.Instance.Setting.RemovedColor;
             }
 
             return null;
@@ -204,10 +208,15 @@ namespace ExcelMerge.GUI.Models
 
             ExcelCell excelCell;
             var status = ExcelCellStatus.None;
-            
+
             if (TryGetCell(row, column, out excelCell, direct))
             {
                 //do nothing.
+            }
+
+            if(excelCell != null)
+            {
+                status = excelCell.Status;
             }            
 
             cell.backgroundColor = null;

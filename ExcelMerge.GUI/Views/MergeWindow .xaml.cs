@@ -39,11 +39,14 @@ namespace ExcelMerge.GUI.Views
         {
             InitializeComponent();
             InitializeContainer();
+            InitializeEventListeners();
 
-            if(diffView == null)
+            if (diffView == null)
             {
                 this.Close();
             }
+
+            App.Instance.OnSettingUpdated += OnApplicationSettingUpdated;
 
             _diffView = diffView;
             _dstFilePath = dstFilePath;
@@ -59,17 +62,49 @@ namespace ExcelMerge.GUI.Views
 
             args = new DiffViewEventArgs<FastGridControl>(MergeDataGrid, container);
             DataGridEventDispatcher.Instance.DispatchFileSettingUpdateEvent(args, fileSetting);
-            DataGridEventDispatcher.Instance.DispatchPostExecuteDiffEvent(args);
 
             InitCurrentCell();
         }
+
+        private void OnApplicationSettingUpdated()
+        {
+            var e = new DiffViewEventArgs<FastGridControl>(null, container, TargetType.First);
+            DataGridEventDispatcher.Instance.DispatchApplicationSettingUpdateEvent(e);
+        }
+
+        private void Window_Loaded(object sender, EventArgs e)
+        {
+            var args = new DiffViewEventArgs<FastGridControl>(null, container, TargetType.First);
+            DataGridEventDispatcher.Instance.DispatchParentLoadEvent(args);
+        }
+
+        private void Window_ContentRendered(object sender, EventArgs e)
+        {
+            var args = new DiffViewEventArgs<FastGridControl>(MergeDataGrid, container);
+            DataGridEventDispatcher.Instance.DispatchDisplayFormatChangeEvent(args, false);
+            DataGridEventDispatcher.Instance.DispatchPostExecuteDiffEvent(args);
+        }
+
+        
 
         private void InitializeContainer()
         {
             container = new UnityContainer();
             container
                 .RegisterInstance(mergeKey, MergeDataGrid)
-                .RegisterInstance(mergeKey, MergeValueTextBox);
+                .RegisterInstance(mergeKey, MergeValueTextBox)                
+                .RegisterInstance(mergeKey, MergeLocationGrid)
+                .RegisterInstance(mergeKey, MergeViewRectangle);
+        }
+
+        private void InitializeEventListeners()
+        {
+            var eventHandler = new DiffViewEventHandler(mergeKey);    
+
+            DataGridEventDispatcher.Instance.Listeners.Add(eventHandler);
+            LocationGridEventDispatcher.Instance.Listeners.Add(eventHandler);
+            ViewportEventDispatcher.Instance.Listeners.Add(eventHandler); 
+            ValueTextBoxEventDispatcher.Instance.Listeners.Add(eventHandler);
         }
 
         private void ReadWorkBook()
@@ -344,14 +379,28 @@ namespace ExcelMerge.GUI.Views
             MergeDataGrid.NotifyRefresh();
         }
 
-        private void MergeSrcButton_Click(object sender, RoutedEventArgs e)
+        private void UserLeftButton_Click(object sender, RoutedEventArgs e)
         {
+            if (_diffView == null)
+                return;
 
+            var text = _diffView.GetCurrentCellText(true);
+
+            (MergeDataGrid.Model as SheetGridModel).SetCellText(MergeDataGrid.CurrentCell.Row.Value, MergeDataGrid.CurrentCell.Column.Value, text);
+
+            MergeDataGrid.NotifyRefresh();
         }
 
-        private void MergeDstButton_Click(object sender, RoutedEventArgs e)
+        private void UserRightButton_Click(object sender, RoutedEventArgs e)
         {
+            if (_diffView == null)
+                return;
 
+            var text = _diffView.GetCurrentCellText(false);
+
+            (MergeDataGrid.Model as SheetGridModel).SetCellText(MergeDataGrid.CurrentCell.Row.Value, MergeDataGrid.CurrentCell.Column.Value, text);
+
+            MergeDataGrid.NotifyRefresh();
         }
 
         private void SaveExcel_Click(object sender, RoutedEventArgs e)

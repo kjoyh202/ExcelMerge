@@ -123,11 +123,11 @@
   <data name="Button_ApplyCell" xml:space="preserve">
     <value>Apply</value>
   </data>
-  <data name="Button_MergeSource" xml:space="preserve">
-    <value>Merge Source</value>
+  <data name="Button_UseLeft" xml:space="preserve">
+    <value>Use Left</value>
   </data>
-  <data name="Button_MergeDestination" xml:space="preserve">
-    <value>Merge Destination</value>
+  <data name="Button_UseRight" xml:space="preserve">
+    <value>Use Right</value>
   </data>
   <data name="Button_SaveExcel" xml:space="preserve">
     <value>Save Excel</value>

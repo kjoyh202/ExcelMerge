@@ -1167,5 +1167,21 @@ namespace ExcelMerge.GUI.Views
         {
             CopyToClipboardSelectedCells(",");
         }
+
+
+        public string GetCurrentCellText(bool isSrc)
+        {
+            FastGridControl targetGrid;
+            if (isSrc)
+            {
+                targetGrid = SrcDataGrid;
+            }
+            else
+            {
+                targetGrid = DstDataGrid;
+            }
+
+            return (targetGrid.Model as DiffGridModel).GetCellText(targetGrid.CurrentCell.Row.Value, targetGrid.CurrentCell.Column.Value);
+        }
     }
 }

@@ -6,5 +6,8 @@
         Modified,
         Added,
         Removed,
+
+        Empty, 
+        Filled,
     }
 }

@@ -79,29 +79,29 @@ namespace ExcelMerge.GUI.Properties {
         }
         
         /// <summary>
-        ///   Merge Destination과(와) 유사한 지역화된 문자열을 찾습니다.
-        /// </summary>
-        public static string Button_MergeDestination {
-            get {
-                return ResourceManager.GetString("Button_MergeDestination", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Merge Source과(와) 유사한 지역화된 문자열을 찾습니다.
-        /// </summary>
-        public static string Button_MergeSource {
-            get {
-                return ResourceManager.GetString("Button_MergeSource", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Save Excel과(와) 유사한 지역화된 문자열을 찾습니다.
         /// </summary>
         public static string Button_SaveExcel {
             get {
                 return ResourceManager.GetString("Button_SaveExcel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Use Left과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string Button_UseLeft {
+            get {
+                return ResourceManager.GetString("Button_UseLeft", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Use Right과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string Button_UseRight {
+            get {
+                return ResourceManager.GetString("Button_UseRight", resourceCulture);
             }
         }
         

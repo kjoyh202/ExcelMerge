@@ -10,12 +10,15 @@
 		xmlns:fg="clr-namespace:FastWpfGrid;assembly=FastWpfGrid"
 		xmlns:behavior="clr-namespace:ExcelMerge.GUI.Behaviors"
         xmlns:ctrl="clr-namespace:ExcelMerge.GUI.Controls"
+		xmlns:gui="clr-namespace:ExcelMerge.GUI"
         mc:Ignorable="d"
         WindowState="Maximized"
         WindowStartupLocation="CenterScreen"
         Title="Merge Window" 
         Height="{Binding Source={x:Static SystemParameters.PrimaryScreenHeight}, Converter={vc:PercentageConverter}, ConverterParameter='0.8'}" 
         Width="{Binding Source={x:Static SystemParameters.PrimaryScreenWidth}, Converter={vc:PercentageConverter}, ConverterParameter='0.8'}" 
+		Loaded="Window_Loaded"
+		ContentRendered="Window_ContentRendered"
         >
 
     <Window.Resources>
@@ -55,14 +58,14 @@
                   Click="ApplyCellButton_Click"
                   IsEnabled="{Binding Executable}"/>
 				
-				<Button x:Name="Button2" Content="{x:Static props:Resources.Button_MergeSource}" 
+				<Button x:Name="Button2" Content="{x:Static props:Resources.Button_UseLeft}" 
                   Margin="10,0,0,0" Height="40" Padding="5,5"
-                  Click="MergeSrcButton_Click"
+                  Click="UserLeftButton_Click"
                   IsEnabled="{Binding Executable}"/>
 				
-				<Button x:Name="Button3" Content="{x:Static props:Resources.Button_MergeDestination}" 
+				<Button x:Name="Button3" Content="{x:Static props:Resources.Button_UseRight}" 
                   Margin="10,0,0,0" Height="40" Padding="5,5"
-                  Click="MergeDstButton_Click"
+                  Click="UserRightButton_Click"
                   IsEnabled="{Binding Executable}"/>
 
 				<Button x:Name="Button4" Content="{x:Static props:Resources.Button_SaveExcel}" 
@@ -81,10 +84,10 @@
 			<Grid x:Name="MergeLocationGrid" ShowGridLines="False"
             MouseDown="LocationGrid_MouseDown" MouseMove="LocationGrid_MouseMove" MouseWheel="LocationGrid_MouseWheel"
             Background="#00000000">
-				<Rectangle x:Name="SrcViewRectangle" HorizontalAlignment="Left" VerticalAlignment="Top"
+				<Rectangle x:Name="MergeViewRectangle" HorizontalAlignment="Left" VerticalAlignment="Top"
                    Fill="LightBlue" Opacity="0.5" 
-                   Width="{Binding ActualWidth, ElementName=SrcLocationGrid}" 
-                   Height="{Binding ActualHeight, ElementName=SrcLocationGrid}"
+                   Width="{Binding ActualWidth, ElementName=MergeLocationGrid}" 
+                   Height="{Binding ActualHeight, ElementName=MergeLocationGrid}"
                    Panel.ZIndex="1"/>
 			</Grid>
 		</Border>
@@ -104,7 +107,7 @@
                         >
 			<i:Interaction.Behaviors>
 				<behavior:DragAcceptBehavior 
-                        Description="{Binding DataContext. Description,RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                        Description="{Binding DataContext. Description,RelativeSource={RelativeSource AncestorType=Window}}"/>
 			</i:Interaction.Behaviors>
 
 			<fg:FastGridControl.ContextMenu>

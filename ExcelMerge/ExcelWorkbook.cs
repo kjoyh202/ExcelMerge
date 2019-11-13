@@ -8,6 +8,7 @@ namespace ExcelMerge
     public class ExcelWorkbook
     {
         public Dictionary<string, ExcelSheet> Sheets { get; private set; }
+        public IWorkbook srcWb = null;
 
         public ExcelWorkbook()
         {
@@ -22,11 +23,12 @@ namespace ExcelMerge
             if (Path.GetExtension(path) == ".tsv")
                 return CreateFromTsv(path, config);
 
-            var srcWb = WorkbookFactory.Create(path);
             var wb = new ExcelWorkbook();
-            for (int i = 0; i < srcWb.NumberOfSheets; i++)
+            wb.srcWb = WorkbookFactory.Create(path);
+            
+            for (int i = 0; i < wb.srcWb.NumberOfSheets; i++)
             {
-                var srcSheet = srcWb.GetSheetAt(i);
+                var srcSheet = wb.srcWb.GetSheetAt(i);
                 wb.Sheets.Add(srcSheet.SheetName, ExcelSheet.Create(srcSheet, config));
             }
 

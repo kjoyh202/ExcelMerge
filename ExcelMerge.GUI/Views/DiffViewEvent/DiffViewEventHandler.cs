@@ -505,18 +505,40 @@ namespace ExcelMerge.GUI.Views
             if (dataGrid.Model == null)
                 return ret;
 
-            var model = dataGrid.Model as DiffGridModel;
-            var rowCount = model.RowCount - model.GetHiddenRows(dataGrid).Count;
-            for (int i = 0; i < rowCount; i++)
+            if(dataGrid.Model is DiffGridModel)
             {
-                var columnColorMap = new Dictionary<int, Color?>();
-                for (int j = 0, ccount = dataGrid.Model.ColumnCount; j < ccount; j++)
+                DiffGridModel model = dataGrid.Model as DiffGridModel;
+                if (model != null)
                 {
-                    columnColorMap.Add(j, model.GetCell(dataGrid, i, j, true)?.BackgroundColor);
-                }
+                    var rowCount = model.RowCount - model.GetHiddenRows(dataGrid).Count;
+                    for (int i = 0; i < rowCount; i++)
+                    {
+                        var columnColorMap = new Dictionary<int, Color?>();
+                        for (int j = 0, ccount = dataGrid.Model.ColumnCount; j < ccount; j++)
+                        {
+                            columnColorMap.Add(j, model.GetCell(dataGrid, i, j, true)?.BackgroundColor);
+                        }
 
-                ret.Add(columnColorMap);
-            }
+                        ret.Add(columnColorMap);
+                    }
+                }
+            }          
+            else if(dataGrid.Model is SheetGridModel)
+            {
+                SheetGridModel model = dataGrid.Model as SheetGridModel;
+
+                var rowCount = model.RowCount - model.GetHiddenRows(dataGrid).Count;
+                for (int i = 0; i < rowCount; i++)
+                {
+                    var columnColorMap = new Dictionary<int, Color?>();
+                    for (int j = 0, ccount = dataGrid.Model.ColumnCount; j < ccount; j++)
+                    {
+                        columnColorMap.Add(j, model.GetCell(dataGrid, i, j, true)?.BackgroundColor);
+                    }
+
+                    ret.Add(columnColorMap);
+                }
+            }            
 
             return ret;
         }
