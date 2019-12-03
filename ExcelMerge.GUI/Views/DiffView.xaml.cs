@@ -540,6 +540,7 @@ namespace ExcelMerge.GUI.Views
                 }
                 catch(Exception e)
                 {
+                    Console.WriteLine(e);
                     return;
                 }
 
@@ -548,10 +549,11 @@ namespace ExcelMerge.GUI.Views
                     mergeWindow.Close();
                     mergeWindow = null;
                 }
-
+                
                 FileSetting mergeFileSetting = FindFileSettings(isStartup, tempFilePath);
+                var diff2 = Helper.SerializableDeepClone<ExcelSheetDiff>(diff);
 
-                mergeWindow = new MergeWindow(this, DstPathTextBox.Text, tempFilePath, DstSheetCombobox.SelectedItem.ToString(), mergeFileSetting);
+                mergeWindow = new MergeWindow(this, new DiffGridModel(diff2, DiffType.Dest), DstPathTextBox.Text, tempFilePath, DstSheetCombobox.SelectedItem.ToString(), mergeFileSetting);
                 mergeWindow.Show();
             }
         }
@@ -1171,17 +1173,16 @@ namespace ExcelMerge.GUI.Views
 
         public string GetCurrentCellText(bool isSrc)
         {
-            FastGridControl targetGrid;
             if (isSrc)
             {
-                targetGrid = SrcDataGrid;
+                return (SrcDataGrid.Model as DiffGridModel).GetSrcCellText(SrcDataGrid.CurrentCell.Row.Value, SrcDataGrid.CurrentCell.Column.Value);
             }
             else
             {
-                targetGrid = DstDataGrid;
+                return (SrcDataGrid.Model as DiffGridModel).GetDstCellText(SrcDataGrid.CurrentCell.Row.Value, SrcDataGrid.CurrentCell.Column.Value);
             }
 
-            return (targetGrid.Model as DiffGridModel).GetCellText(targetGrid.CurrentCell.Row.Value, targetGrid.CurrentCell.Column.Value);
+       
         }
     }
 }

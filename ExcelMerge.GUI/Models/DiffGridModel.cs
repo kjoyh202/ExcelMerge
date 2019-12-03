@@ -89,6 +89,12 @@ namespace ExcelMerge.GUI.Models
             return string.Empty;
         }
 
+        public override void SetCellText(int row, int column, string value)
+        {
+            ExcelCell newCell = new ExcelCell(value, column, row);
+            SheetDiff.ReplaceCell(row, column, newCell);
+        }
+
         public override string GetCellText(int row, int column)
         {
             return GetCellText(row, column, false);
@@ -99,6 +105,24 @@ namespace ExcelMerge.GUI.Models
             ExcelCellDiff cellDiff;
             if (TryGetCellDiff(row, column, out cellDiff, direct))
                 return GetCellText(cellDiff);
+
+            return string.Empty;
+        }
+
+        public string GetSrcCellText(int row, int column)
+        {
+            ExcelCellDiff cellDiff;
+            if (TryGetCellDiff(row, column, out cellDiff))
+                return cellDiff.SrcCell.Value;
+
+            return string.Empty;
+        }
+
+        public string GetDstCellText(int row, int column)
+        {
+            ExcelCellDiff cellDiff;
+            if (TryGetCellDiff(row, column, out cellDiff))
+                return cellDiff.DstCell.Value;
 
             return string.Empty;
         }

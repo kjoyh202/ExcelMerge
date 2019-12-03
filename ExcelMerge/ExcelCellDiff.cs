@@ -1,5 +1,8 @@
-﻿namespace ExcelMerge
+﻿using System;
+
+namespace ExcelMerge
 {
+    [Serializable]
     public class ExcelCellDiff
     {
         public int ColumnIndex { get; }

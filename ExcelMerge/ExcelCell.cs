@@ -1,5 +1,8 @@
-﻿namespace ExcelMerge
+﻿using System;
+
+namespace ExcelMerge
 {
+    [Serializable]
     public class ExcelCell
     {
         public string Value { get; private set; }

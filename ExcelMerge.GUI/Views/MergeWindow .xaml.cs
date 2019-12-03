@@ -35,7 +35,7 @@ namespace ExcelMerge.GUI.Views
         private ExcelWorkbook excelWorkBook = null;
         private ExcelSheet excelSheet = null;
 
-        public MergeWindow(DiffView diffView, string dstFilePath, string mergeFilePath, string currentSheetName, FileSetting fileSetting)
+        public MergeWindow(DiffView diffView, DiffGridModel model, string dstFilePath, string mergeFilePath, string currentSheetName, FileSetting fileSetting)
         {
             InitializeComponent();
             InitializeContainer();
@@ -58,7 +58,8 @@ namespace ExcelMerge.GUI.Views
 
             ReadWorkBook();
 
-            MergeDataGrid.Model = new SheetGridModel(excelSheet);
+            // MergeDataGrid.Model = new SheetGridModel(excelSheet);
+            MergeDataGrid.Model = model;
 
             args = new DiffViewEventArgs<FastGridControl>(MergeDataGrid, container);
             DataGridEventDispatcher.Instance.DispatchFileSettingUpdateEvent(args, fileSetting);
@@ -114,7 +115,7 @@ namespace ExcelMerge.GUI.Views
                 progress.Report(Properties.Resources.Msg_ReadingFiles);
 
                 var config = CreateReadConfig();
-                excelWorkBook = ExcelWorkbook.Create(_mergeFilePath, config);
+                excelWorkBook = ExcelWorkbook.Create(_mergeFilePath, config, true);
                 excelSheet = excelWorkBook.Sheets[_currentSheetName];                
             });
         }
@@ -201,7 +202,7 @@ namespace ExcelMerge.GUI.Views
             if (MergeDataGrid.Model == null)
                 return;
 
-            var value = (MergeDataGrid.Model as SheetGridModel).GetCellText(MergeDataGrid.CurrentCell.Row.Value, MergeDataGrid.CurrentCell.Column.Value, true);            
+            var value = (MergeDataGrid.Model as DiffGridModel).GetCellText(MergeDataGrid.CurrentCell.Row.Value, MergeDataGrid.CurrentCell.Column.Value, true);            
 
             UpdateValue(value);
             
@@ -374,38 +375,44 @@ namespace ExcelMerge.GUI.Views
 
             text = text.Substring(0, text.LastIndexOf("\r\n"));
             
-            (MergeDataGrid.Model as SheetGridModel).SetCellText(MergeDataGrid.CurrentCell.Row.Value, MergeDataGrid.CurrentCell.Column.Value, text);
+            (MergeDataGrid.Model as DiffGridModel).SetCellText(MergeDataGrid.CurrentCell.Row.Value, MergeDataGrid.CurrentCell.Column.Value, text);
+
+            excelWorkBook.SetCellValue(_currentSheetName, MergeDataGrid.CurrentCell.Row.Value, MergeDataGrid.CurrentCell.Column.Value, text);
 
             MergeDataGrid.NotifyRefresh();
         }
 
-        private void UserLeftButton_Click(object sender, RoutedEventArgs e)
+        private void UseLeftButton_Click(object sender, RoutedEventArgs e)
         {
             if (_diffView == null)
                 return;
 
             var text = _diffView.GetCurrentCellText(true);
 
-            (MergeDataGrid.Model as SheetGridModel).SetCellText(MergeDataGrid.CurrentCell.Row.Value, MergeDataGrid.CurrentCell.Column.Value, text);
+            (MergeDataGrid.Model as DiffGridModel).SetCellText(MergeDataGrid.CurrentCell.Row.Value, MergeDataGrid.CurrentCell.Column.Value, text);
+
+            excelWorkBook.SetCellValue(_currentSheetName, MergeDataGrid.CurrentCell.Row.Value, MergeDataGrid.CurrentCell.Column.Value, text);
 
             MergeDataGrid.NotifyRefresh();
         }
 
-        private void UserRightButton_Click(object sender, RoutedEventArgs e)
+        private void UseRightButton_Click(object sender, RoutedEventArgs e)
         {
             if (_diffView == null)
                 return;
 
             var text = _diffView.GetCurrentCellText(false);
 
-            (MergeDataGrid.Model as SheetGridModel).SetCellText(MergeDataGrid.CurrentCell.Row.Value, MergeDataGrid.CurrentCell.Column.Value, text);
+            (MergeDataGrid.Model as DiffGridModel).SetCellText(MergeDataGrid.CurrentCell.Row.Value, MergeDataGrid.CurrentCell.Column.Value, text);
+
+            excelWorkBook.SetCellValue(_currentSheetName, MergeDataGrid.CurrentCell.Row.Value, MergeDataGrid.CurrentCell.Column.Value, text);
 
             MergeDataGrid.NotifyRefresh();
         }
 
         private void SaveExcel_Click(object sender, RoutedEventArgs e)
         {
-
+            excelWorkBook.SaveExcel(excelWorkBook.FilePath);
         }
     }
 }

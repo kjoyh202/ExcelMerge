@@ -60,12 +60,12 @@
 				
 				<Button x:Name="Button2" Content="{x:Static props:Resources.Button_UseLeft}" 
                   Margin="10,0,0,0" Height="40" Padding="5,5"
-                  Click="UserLeftButton_Click"
+                  Click="UseLeftButton_Click"
                   IsEnabled="{Binding Executable}"/>
 				
 				<Button x:Name="Button3" Content="{x:Static props:Resources.Button_UseRight}" 
                   Margin="10,0,0,0" Height="40" Padding="5,5"
-                  Click="UserRightButton_Click"
+                  Click="UseRightButton_Click"
                   IsEnabled="{Binding Executable}"/>
 
 				<Button x:Name="Button4" Content="{x:Static props:Resources.Button_SaveExcel}" 

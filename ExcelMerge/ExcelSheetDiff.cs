@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ExcelMerge
 {
+    [Serializable]
     public class ExcelSheetDiff
     {
         public SortedDictionary<int, ExcelRowDiff> Rows { get; private set; }
@@ -11,6 +13,7 @@ namespace ExcelMerge
         {
             Rows = new SortedDictionary<int, ExcelRowDiff>();
         }
+
 
         public ExcelRowDiff CreateRow()
         {
@@ -47,5 +50,23 @@ namespace ExcelMerge
                 ModifiedCellCount = modifiedCellCount,
             };
         }
+
+
+        public void ReplaceCell(int row, int column, ExcelCell cell)
+        {
+            if (Rows.Count < row)
+                return;
+
+            foreach(var _cell in Rows[row].Cells)
+            {
+                if(_cell.Value.ColumnIndex == column)
+                {
+                    _cell.Value.DstCell.SetValue(cell.Value);
+                    return;
+                }
+            }            
+        }
+
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
@@ -8,14 +9,17 @@ namespace ExcelMerge
     public class ExcelWorkbook
     {
         public Dictionary<string, ExcelSheet> Sheets { get; private set; }
-        public IWorkbook srcWb = null;
+        public IWorkbook srcWb = null;        
 
+        public string FilePath = string.Empty;
+
+  
         public ExcelWorkbook()
         {
             Sheets = new Dictionary<string, ExcelSheet>();
         }
 
-        public static ExcelWorkbook Create(string path, ExcelSheetReadConfig config)
+        public static ExcelWorkbook Create(string path, ExcelSheetReadConfig config, bool enableEdit = false)
         {
             if (Path.GetExtension(path) == ".csv")
                 return CreateFromCsv(path, config);
@@ -23,15 +27,29 @@ namespace ExcelMerge
             if (Path.GetExtension(path) == ".tsv")
                 return CreateFromTsv(path, config);
 
+
             var wb = new ExcelWorkbook();
-            wb.srcWb = WorkbookFactory.Create(path);
+
+            FileAccess access = enableEdit == true ? FileAccess.ReadWrite : FileAccess.Read;
+
+            if (Path.GetExtension(path) == ".xlsm" || Path.GetExtension(path) == ".xlsx" || Path.GetExtension(path) == ".tmp")
+            {
+                FileStream stream = new FileStream(path, FileMode.OpenOrCreate, access, FileShare.ReadWrite);                
+                wb.srcWb = new XSSFWorkbook(stream);
+            }
+            else
+            {
+                wb.srcWb = WorkbookFactory.Create(path);
+            }           
             
+            //wb.srcWb.Close();
+            wb.FilePath = path;
+
             for (int i = 0; i < wb.srcWb.NumberOfSheets; i++)
             {
                 var srcSheet = wb.srcWb.GetSheetAt(i);
                 wb.Sheets.Add(srcSheet.SheetName, ExcelSheet.Create(srcSheet, config));
             }
-
             return wb;
         }
 
@@ -69,32 +87,111 @@ namespace ExcelMerge
             return wb;
         }
 
-        private void SaveExcel(string path)
+
+        public void SetCellValue(string sheetName, int row, int column, string value)
         {
-            using(FileStream stream = new FileStream(path, FileMode.Create, FileAccess.Write))
+            var sheetIndex = srcWb.GetSheetIndex(sheetName);
+            var srcSheet = srcWb.GetSheetAt(sheetIndex);
+
+            if (srcSheet == null)
+                return;
+
+            var srcRow = srcSheet.GetRow(row);
+
+            //create rows if not exist.
+            if(srcRow == null)
             {
-                IWorkbook wb = new XSSFWorkbook();
-
-                foreach (KeyValuePair<string, ExcelSheet> kp in Sheets)
+                for(int i = 0; i < row + 1; i++)
                 {
-                    var sheet = wb.CreateSheet(kp.Key);
-                    var sheetData = kp.Value;
-
-                    for (int i = 0; i < sheetData.Rows.Count; i++)
+                    if(srcSheet.GetRow(i) == null)
                     {
-                        var rowData = sheetData.Rows[i];
-
-                        for (int j = 0; j < rowData.Cells.Count; j++)
-                        {
-                            IRow row = sheet.CreateRow(i);
-                            ICell cell = row.CreateCell(j);
-                            cell.SetCellValue(rowData.Cells[j].Value);
-                        }
+                        srcSheet.CreateRow(i);
                     }
                 }
 
-                wb.Write(stream);
-            }    
+                srcRow = srcSheet.CreateRow(row);
+            }
+
+            var cell = srcRow.GetCell(column);
+
+            //create empty cell if not exist.
+            if(cell == null)
+            {
+                for (int i = 0; i < column + 1; i++)
+                {
+                    if (srcRow.GetCell(i) == null)
+                    {
+                        srcRow.CreateCell(i);
+                    }
+                }
+
+                cell = srcRow.CreateCell(column);
+            }            
+
+            cell.SetCellValue(value);
+
+            return;
+        }
+
+        public void SaveExcel(string path)
+        {
+
+            //            var stream = new FileStream(FilePath + ".xlsx", FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+            using (var fs = new FileStream(FilePath + ".xlsm", FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+            {
+                srcWb.Write(fs);
+            }
+            
+
+
+
+            
+
+            /*
+            using (FileStream stream = new FileStream(path + "_TMP3.xlsx", FileMode.Create))
+            {
+                
+                try
+                {
+                    srcWb.Write(stream);
+                    stream.Close();
+                    
+                    var newWorkBook = new XSSFWorkbook();
+
+                    for (int i = 0; i < srcWb.NumberOfSheets; i++)
+                    {
+                        var srcSheet = srcWb.GetSheetAt(i);
+                        var newSheet = newWorkBook.CreateSheet(srcSheet.SheetName);
+
+                        for(int rowIdx = 0; rowIdx < srcSheet.LastRowNum+1; rowIdx++)
+                        {
+                            if(srcSheet.GetRow(rowIdx) != null)
+                            {
+                                var row = srcSheet.GetRow(rowIdx);
+
+                                var newRow = newSheet.CreateRow(rowIdx);
+
+                                foreach(var cell in row.Cells)
+                                {
+                                    var newCell = newRow.CreateCell(cell.ColumnIndex);
+                                    newCell.SetCellValue("test");
+                                }
+                            }
+                        }
+                    }                   
+
+                    newWorkBook.Write(stream);
+                    
+
+                }
+                catch(Exception e)
+                {
+                    Console.Error.WriteLine(e);
+                }
+                
+                
+            }
+            */
         }
     }
 }

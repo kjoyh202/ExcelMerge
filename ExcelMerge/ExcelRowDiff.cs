@@ -1,8 +1,10 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
+using System;
 
 namespace ExcelMerge
 {
+    [Serializable]
     public class ExcelRowDiff
     {
         public int Index { get; private set; }
